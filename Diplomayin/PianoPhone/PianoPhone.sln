@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PianoPhone", "PianoPhone\PianoPhone.csproj", "{91B4CDC2-0C60-4390-8B44-C0906AC5C277}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM = Debug|ARM
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|ARM = Release|ARM
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Debug|ARM.ActiveCfg = Debug|ARM
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Debug|ARM.Build.0 = Debug|ARM
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Debug|ARM.Deploy.0 = Debug|ARM
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Debug|x86.ActiveCfg = Debug|x86
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Debug|x86.Build.0 = Debug|x86
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Debug|x86.Deploy.0 = Debug|x86
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Release|ARM.ActiveCfg = Release|ARM
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Release|ARM.Build.0 = Release|ARM
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Release|ARM.Deploy.0 = Release|ARM
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Release|x86.ActiveCfg = Release|x86
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Release|x86.Build.0 = Release|x86
+		{91B4CDC2-0C60-4390-8B44-C0906AC5C277}.Release|x86.Deploy.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

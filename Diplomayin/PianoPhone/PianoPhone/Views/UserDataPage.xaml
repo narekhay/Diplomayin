@@ -1,0 +1,53 @@
+﻿<phone:PhoneApplicationPage
+    x:Class="PianoPhone.Views.UserDataPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:custom="clr-namespace:PianoPhone"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait" Orientation="Portrait"
+    mc:Ignorable="d"
+    shell:SystemTray.IsVisible="True">
+    
+   
+
+    <!--LayoutRoot is the root grid where all page content is placed-->
+        <Grid x:Name="LayoutRoot" Background="{StaticResource PhoneChromeBrush}">
+            <phone:Panorama>
+                <phone:PanoramaItem Name="photosItem" Header="Photos" >
+                    <custom:CollectionControl Name="photosCollectionControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                          DataContext="{Binding PhotoCollectionViewModel,ElementName=userDataControl}"/>
+                </phone:PanoramaItem>
+                <phone:PanoramaItem Name="videoItem" Header="Videos">
+
+                </phone:PanoramaItem>
+                <phone:PanoramaItem Name="audioItem" Header="Audio">
+
+                </phone:PanoramaItem>
+
+                <phone:PanoramaItem Name="documentsItems" Header="Documents">
+
+                </phone:PanoramaItem>
+
+                <phone:PanoramaItem Name="contactsItems" Header="Contacts">
+
+                </phone:PanoramaItem>
+            </phone:Panorama>
+        </Grid>
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Select" Click="ApplicationBarIconButton_Click_1" />
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Done"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Cancel"/>
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem Text="MenuItem 1"/>
+                <shell:ApplicationBarMenuItem Text="MenuItem 2"/>
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
+</phone:PhoneApplicationPage>

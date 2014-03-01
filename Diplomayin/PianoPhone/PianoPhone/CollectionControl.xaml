@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="PianoPhone.CollectionControl"
+             x:Name="collectionControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    mc:Ignorable="d"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    d:DesignHeight="480" d:DesignWidth="480">
+    <UserControl.Resources>
+        <DataTemplate x:Key="CollectionControlCellItemTemplate">
+            <Grid Tap="Grid_Tap_1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Image CacheMode="BitmapCache" Source="{Binding Thumbnail}"
+                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                       Stretch="UniformToFill"/>
+                <TextBlock Text="{Binding FileName}" Grid.Row="1" VerticalAlignment="Bottom"
+                           HorizontalAlignment="Stretch" Margin="2,0,2,0"/>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid x:Name="LayoutRoot" DataContext="{Binding}" Background="{StaticResource PhoneChromeBrush}">
+        <toolkit:LongListMultiSelector Name="longListSelector" LayoutMode="{Binding LayoutMode}" ItemTemplate="{StaticResource CollectionControlCellItemTemplate}"
+                             DataContext="{Binding}" GridCellSize="150,150"
+                                   ItemsSource="{Binding Items}" IsSelectionEnabled="{Binding IsSelectionEnabled}"
+                                      SelectionChanged="longListSelector_SelectionChanged_1"
+                                  />
+    </Grid>
+</UserControl>
