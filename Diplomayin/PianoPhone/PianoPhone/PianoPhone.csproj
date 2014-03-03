@@ -124,6 +124,7 @@
     <Compile Include="ViewModels\IViewModel.cs" />
     <Compile Include="ViewModels\PhotosViewModel.cs" />
     <Compile Include="ViewModels\AudioViewModel.cs" />
+    <Compile Include="Views\ContactsViewModel.cs" />
     <Compile Include="Views\MediaLibraryMultiSelector.xaml.cs">
       <DependentUpon>MediaLibraryMultiSelector.xaml</DependentUpon>
     </Compile>

@@ -11,6 +11,7 @@ using PianoPhone.ViewModels;
 using PianoPhone.Models;
 using Microsoft.Xna.Framework.Media;
 using System.Collections;
+using System.Windows.Data;
 
 namespace PianoPhone
 {
@@ -23,7 +24,9 @@ namespace PianoPhone
 
         public void Initialize(IViewModel viewModel)
         {
-            this.DataContext = viewModel;            
+            this.DataContext = viewModel;
+            longListSelector.LayoutMode = viewModel.LayoutMode;
+            longListSelector.IsSelectionEnabled = viewModel.IsSelectionEnabled;
         }
 
 
@@ -48,6 +51,7 @@ namespace PianoPhone
 
              OnCellSelected(this, new CellSelectedEventArgs(model, type ));
         }
+
         public delegate void CellSelectedEventHandler(object myObject,CellSelectedEventArgs myArgs);
         public event CellSelectedEventHandler CellSelected;
         void OnCellSelected(object sender, CellSelectedEventArgs e)
@@ -68,6 +72,19 @@ namespace PianoPhone
         public void ResetSelection()
         {
             SelectedItems.Clear();
+        }
+
+        public static readonly DependencyProperty LayoutModeProperty = DependencyProperty.Register("LayoutMode", typeof(double), typeof(LongListSelectorLayoutMode), new PropertyMetadata(SetLayoutMode));
+        public static readonly DependencyProperty IsSelectionEnabledProperty = DependencyProperty.Register("IsSelectionEnabled", typeof(double), typeof(bool), new PropertyMetadata(SetIsSelectionEnabled));
+        
+        private static void SetLayoutMode(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ((d as CollectionControl).DataContext as IViewModel).LayoutMode = (LongListSelectorLayoutMode)e.NewValue;
+        }
+
+        private static void SetIsSelectionEnabled(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ((d as CollectionControl).DataContext as IViewModel).IsSelectionEnabled = (bool)e.NewValue;
         }
 
     }

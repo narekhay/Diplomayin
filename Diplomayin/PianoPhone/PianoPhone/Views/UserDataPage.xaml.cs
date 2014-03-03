@@ -10,6 +10,7 @@ using Microsoft.Phone.Shell;
 using PianoPhone.ViewModels;
 using Microsoft.Xna.Framework.Media;
 using System.Windows.Media.Imaging;
+using System.Threading;
 
 namespace PianoPhone.Views
 {
@@ -21,11 +22,12 @@ namespace PianoPhone.Views
             photosCollectionControl.CellSelected += photosCollectionControl_CellSelected;
             AlbumsCollectionViewModel = new AlbumsViewModel();
             photosCollectionControl.Initialize(AlbumsCollectionViewModel);
-            AlbumsCollectionViewModel.LoadAlbumsFromMediaLibrary();
+            AlbumsCollectionViewModel.Initialize(cts.Token, false);
         }
 
         public int deep = 0;
         public static Picture SelectedImage;
+        CancellationTokenSource cts = new CancellationTokenSource();
         
         void photosCollectionControl_CellSelected(object myObject, CellSelectedEventArgs myArgs)
         {
@@ -48,7 +50,7 @@ namespace PianoPhone.Views
             {
                 case CellType.Album:
                     PhotosCollectionViewModel = new PhotosViewModel();
-                    PhotosCollectionViewModel.Initialize(myArgs.SelectedItem.Data as PictureAlbum);
+                    PhotosCollectionViewModel.Initialize(myArgs.SelectedItem.Data as PictureAlbum,cts.Token, false );
                     photosCollectionControl.Initialize(PhotosCollectionViewModel);
                     deep++;
                     break;
@@ -92,6 +94,11 @@ namespace PianoPhone.Views
             {
                 selecting = true;
             }
+        }
+
+        private void AddClick(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/Views/MediaLibraryMultiSelector.xaml", UriKind.Relative));
         }
     }
 }

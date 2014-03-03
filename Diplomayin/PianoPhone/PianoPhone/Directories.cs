@@ -13,6 +13,6 @@ namespace PianoPhone
         public static string DefaultAlbum = AlbumRoot + "\\DefaultAlbum";
         public static string Contacts = Root + "Contacts";
         public static string Documents = Root + "Docs";
-        public static string Videos = Root + "Videos";
+        public static string Thumbnails = Root + "Thumbnails";
     }
 }

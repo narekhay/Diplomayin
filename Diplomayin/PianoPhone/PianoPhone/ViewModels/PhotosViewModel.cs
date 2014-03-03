@@ -9,6 +9,7 @@ using System.IO;
 using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using Windows.Storage;
@@ -23,70 +24,67 @@ namespace PianoPhone.ViewModels
             Items = new ObservableCollection<CollectionControlModel>();
         }
 
-        public async void Initialize(PictureAlbum album)
+        public Task Initialize(PictureAlbum album, CancellationToken token, bool fromLibrary = true)
         {
-            await LoadAlbumsFromMediaLibrary(album);
+            if (fromLibrary)
+                return LoadAlbumsFromMediaLibraryAsync(album, token);
+            else
+                return LoadAlbumPhotosFromStoreAsync(album.Name, token);
         }
 
-        public async Task LoadAlbumsFromMediaLibrary(PictureAlbum album)
+        public Task LoadAlbumsFromMediaLibraryAsync(PictureAlbum album, CancellationToken token)
         {
-            foreach (var photo in album.Pictures)
-            {
-                Items.Add(new CollectionControlModel()
+            return Task.Run(async () =>
                 {
-                    FileName = Path.GetFileNameWithoutExtension(photo.Name),
-                    Data = photo
-                });
-                using (Stream str = photo.GetThumbnail())
-                {
-                    byte[] buffer = new byte[str.Length];
-                    await str.ReadAsync(buffer, 0, buffer.Length);
-                    MemoryStream ms = new MemoryStream();
-                    await ms.WriteAsync(buffer, 0, buffer.Length);
-                    Items.Last().Thumbnail = new BitmapImage();
-                    Items.Last().Thumbnail.SetSource(ms);
-
-                }
-            }
+                    foreach (var photo in album.Pictures)
+                    {
+                        token.ThrowIfCancellationRequested();
+                        Items.Add(new CollectionControlModel()
+                        {
+                            FileName = Path.GetFileNameWithoutExtension(photo.Name),
+                            Data = photo
+                        });
+                        token.ThrowIfCancellationRequested();
+                        using (Stream str = photo.GetThumbnail())
+                        {
+                            byte[] buffer = new byte[str.Length];
+                            await str.ReadAsync(buffer, 0, buffer.Length);
+                            token.ThrowIfCancellationRequested();
+                            MemoryStream ms = new MemoryStream();
+                            await ms.WriteAsync(buffer, 0, buffer.Length);
+                            token.ThrowIfCancellationRequested();
+                            Items.Last().Thumbnail = new BitmapImage();
+                            Items.Last().Thumbnail.SetSource(ms);
+                        }
+                    }
+                },token);
         }
 
-        public async void LoadPhotos()
+        public Task LoadAlbumPhotosFromStoreAsync(string albumName, CancellationToken token)
         {
-            StorageFolder folder = Windows.Storage.ApplicationData.Current.LocalFolder;
-            string folderName  ="PrivatePhotos";
-            return;
-            if (folder.CreateFolderAsync(folderName, CreationCollisionOption.FailIfExists).Status != Windows.Foundation.AsyncStatus.Error)
+            return Task.Run(async () =>
             {
-                var resultFolder = await folder.GetFolderAsync(folderName);
-                var resultFiles = await resultFolder.GetFilesAsync();
-                foreach (var file in resultFiles)
+                token.ThrowIfCancellationRequested();
+                var resultFiles = await FileManager.GetPhotosAsync(albumName, token);
+                token.ThrowIfCancellationRequested();
+                foreach (var photo in resultFiles)
                 {
-                    using (Stream fileStream = await file.OpenStreamForReadAsync())
+                    using (Stream fileStream = photo.Data)
                     {
                         if (fileStream != null)
                         {
                             Items.Add(new CollectionControlModel()
                             {
-                               FileName = Path.GetFileNameWithoutExtension( file.Name)
+                                FileName = photo.Name
                             });
+                            token.ThrowIfCancellationRequested();
                             Items.Last().Thumbnail.SetSource(fileStream);
                         }
-                        fileStream.Close();
-                        fileStream.Dispose();
                     }
+                    token.ThrowIfCancellationRequested();
                 }
-            }
-            else
-            {
-            }
+            });
         }
-
-        
-        private async void AlbumPhotos(PictureAlbum album)
-        {
-        
-        }
-
 
         public ObservableCollection<CollectionControlModel> Items
         {

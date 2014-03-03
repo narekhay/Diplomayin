@@ -27,9 +27,9 @@
         </DataTemplate>
     </UserControl.Resources>
     <Grid x:Name="LayoutRoot" DataContext="{Binding}" Background="{StaticResource PhoneChromeBrush}">
-        <toolkit:LongListMultiSelector Name="longListSelector" LayoutMode="{Binding LayoutMode}" ItemTemplate="{StaticResource CollectionControlCellItemTemplate}"
+        <toolkit:LongListMultiSelector Name="longListSelector"  ItemTemplate="{StaticResource CollectionControlCellItemTemplate}"
                              DataContext="{Binding}" GridCellSize="150,150"
-                                   ItemsSource="{Binding Items}" IsSelectionEnabled="{Binding IsSelectionEnabled}"
+                                   ItemsSource="{Binding Items}" 
                                       SelectionChanged="longListSelector_SelectionChanged_1"
                                   />
     </Grid>

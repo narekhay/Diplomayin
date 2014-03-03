@@ -41,6 +41,7 @@
         </Grid>
     <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Add" Click="AddClick"/>
             <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Select" Click="ApplicationBarIconButton_Click_1" />
             <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Done"/>
             <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Cancel"/>

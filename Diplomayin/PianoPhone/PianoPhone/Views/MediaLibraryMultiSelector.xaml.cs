@@ -8,6 +8,8 @@ using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 using PianoPhone.ViewModels;
+using System.Threading;
+using System.Collections.ObjectModel;
 
 namespace PianoPhone.Views
 {
@@ -20,14 +22,15 @@ namespace PianoPhone.Views
             BuildApplicationBar();
         }
 
-        List<IViewModel> ViewModels;
+        CancellationTokenSource cts = new CancellationTokenSource();
+        public ObservableCollection<IViewModel> ViewModels { get; set; }
         private void InitializeViewModels()
         {
-            ViewModels = new List<IViewModel>();
+            ViewModels = new ObservableCollection<IViewModel>();
             var albumsModel = new AlbumsViewModel();
-            albumsModel.LoadAlbumsFromMediaLibrary();
-            var songsModel = new AudioViewModel();
-            songsModel.LoadSongsMetaDataFromMediaLibrary();
+            albumsModel.Initialize(cts.Token);
+            var contactsModel = new ContactsViewModel();
+            contactsModel.Initialize(cts.Token);
             ViewModels.Add(albumsModel);
         }
 

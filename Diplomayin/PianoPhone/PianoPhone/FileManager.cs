@@ -47,51 +47,142 @@ namespace PianoPhone
             });
         }
 
-        async static void SerializeAndSaveFile<T>(T source, string path)
+        static Task SerializeAndSaveFile<T>(T source, string path)
         {
-                DataContractJsonSerializer jserializer = new DataContractJsonSerializer(typeof(T));
-                using (Stream destination = new MemoryStream())
+            return Task.Run(() =>
                 {
-                    jserializer.WriteObject(destination, source);
-                    await SaveFileAsync(path, destination);
-                }
+                    DataContractJsonSerializer jserializer = new DataContractJsonSerializer(typeof(T));
+                    using (Stream destination = new MemoryStream())
+                    {
+                        jserializer.WriteObject(destination, source);
+                        return SaveFileAsync(path, destination);
+                    }
+                });
         }
 
-        async static Task<Stream> DeserializeAndOpenAsync<T>(string path, FileMode mode, FileAccess access)
+        async static Task<T> DeserializeAndOpenAsync<T>(string path, FileMode mode, FileAccess access)
         {
             await OpenFileAsync(path, mode, access);
             DataContractJsonSerializer jserializer = new DataContractJsonSerializer(typeof(T));
             var source = new FileStream(path, mode, access);
-            jserializer.ReadObject(source);
-            return source;
+            return (T)(jserializer.ReadObject(source));
         }
 
-        static IEnumerable<PPhoto> GetPhotosAsync(string path, CancellationToken token)
+         public static Task<List<PPhoto>> GetPhotosAsync(string albumName, CancellationToken token)
         {
-            return Task.Run(() =>
+            return  Task.Run(async () =>
                 {
-
+                    List<PPhoto> photos = new List<PPhoto>();
+                    using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
+                    {
+                        try
+                        {
+                            string[] fileNames = store.GetFileNames(Path.Combine(Directories.AlbumRoot + albumName + "*"));
+                            foreach (var fileName in fileNames)
+                            {
+                                string filePath = Path.Combine(Directories.AlbumRoot, albumName, fileName);
+                                photos.Add(await DeserializeAndOpenAsync<PPhoto>(filePath, FileMode.Open, FileAccess.ReadWrite));
+                            }
+                        }
+                        catch
+                        {
+                            return photos;
+                        }
+                        return photos;
+                    }
                 });
         }
 
-        public static void GetPhotoAlbumNames()
+         public static Task<List<PFile>> GetPhotoAlbums(CancellationToken token)
+         {
+             return Task.Run(async () =>
+                 {
+                    List<PFile> albums = new List<PFile>();
+                     try
+                     {
+                         using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
+                         {
+                             var fileNames = store.GetFileNames(Directories.Thumbnails + "\\*");
+                             foreach (var fileName in fileNames)
+                             {
+                                 string filePath = Path.Combine(Directories.Thumbnails, fileName);
+                                 albums.Add( await DeserializeAndOpenAsync<PFile>(filePath, FileMode.Open, FileAccess.ReadWrite));
+                             }
+                         }
+                         return albums;
+                     }
+                     catch
+                     {
+                         return albums;
+                     }
+                 }, token);
+         }
+
+         public static Task<List<PContact>> GetContactsAsync(CancellationToken token)
+         {
+             return Task.Run(async () =>
+             {
+                 List<PContact> contacts = new List<PContact>();
+                 try
+                 {
+                     using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
+                     {
+                         token.ThrowIfCancellationRequested();
+                         var fileNames = store.GetFileNames(Directories.Contacts + "\\*");
+                         foreach (var fileName in fileNames)
+                         {
+                             token.ThrowIfCancellationRequested();
+                             string filePath = Path.Combine(Directories.Contacts, fileName);
+                             StoredContact scontact = await DeserializeAndOpenAsync<StoredContact>(filePath, FileMode.Open, FileAccess.ReadWrite);
+                             token.ThrowIfCancellationRequested();
+                             PContact contact = new PContact();
+                             contact.Name = fileName;
+                             contact.Path = filePath;
+                             contact.Contact = scontact;
+                             token.ThrowIfCancellationRequested();
+                             contacts.Add(contact);
+                         }
+                     }
+                     token.ThrowIfCancellationRequested();
+                     return contacts;
+                 }
+                 catch
+                 {
+                     return contacts;
+                 }
+             }, token);
+         }
+        public static IEnumerable<string> GetPhotoAlbumNames()
         {
             List<string> directories = new List<string>();
             using (IsolatedStorageFile file = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                file.GetDirectoryNames(Directories.Root + "*");
+                return file.GetDirectoryNames(Path.Combine(Directories.AlbumRoot, "*"));
             }
         }
 
-        static Task<bool> CreatePhotoAlbumAsync(string albumName)
+        static Task<bool> CreatePhotoAlbumAsync(string albumName, Stream thumbPicture)
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
                 {
                     using (IsolatedStorageFile file = IsolatedStorageFile.GetUserStoreForApplication())
                     {
                         if (file.DirectoryExists(Path.Combine(Directories.AlbumRoot, albumName)))
+                        {
+                            thumbPicture.Dispose();
                             return false;
+                        }
                         file.CreateDirectory(Path.Combine(Directories.AlbumRoot, albumName));
+                        PFile album = new PFile();
+                        album.Name = albumName;
+                        album.Path = Path.Combine(Directories.Thumbnails, albumName);
+                        using(thumbPicture)
+                        {
+                            byte [] buffer=  new byte[thumbPicture.Length];
+                            await thumbPicture.ReadAsync(buffer,0, buffer.Length);
+                            await album.Data.WriteAsync(buffer,0,buffer.Length);
+                        }
+                        await SerializeAndSaveFile<PFile>(album,album.Path);
                         return true;
                     }
                 });
@@ -113,10 +204,10 @@ namespace PianoPhone
             {
                 if (!PhotoAlbumExcists(photo.AlbumName))
                 {
-                    await CreatePhotoAlbumAsync(photo.AlbumName);
+                    await CreatePhotoAlbumAsync(photo.AlbumName, photo.Data);
                     token.ThrowIfCancellationRequested();
                 }
-                SerializeAndSaveFile<PPhoto>(photo, photo.Path);
+                await SerializeAndSaveFile<PPhoto>(photo, photo.Path);
                 count++;
                 token.ThrowIfCancellationRequested();
             }
@@ -138,8 +229,8 @@ namespace PianoPhone
                     file.CreateDirectory(Directories.AlbumRoot);
                     file.CreateDirectory(Directories.DefaultAlbum);
                     file.CreateDirectory(Directories.Documents);
-                    file.CreateDirectory(Directories.Videos);
                     file.CreateDirectory(Directories.DefaultAlbum);
+                    file.CreateDirectory(Directories.Thumbnails);
                 }
             }
         }
@@ -153,7 +244,7 @@ namespace PianoPhone
                 foreach (var album in list)
                 {
                     var pictureAlbum = album.Data as PictureAlbum;
-                    if (await CreatePhotoAlbumAsync(pictureAlbum.Name))
+                    if (await CreatePhotoAlbumAsync(pictureAlbum.Name, pictureAlbum.Pictures.First().GetThumbnail()))
                     {
                         List<PPhoto> photos = new List<PPhoto>();
                         foreach (var picture in pictureAlbum.Pictures)
@@ -189,7 +280,7 @@ namespace PianoPhone
                     string albumName = (data as Picture).Album.Name;
                     if (!PhotoAlbumExcists(albumName))
                     {
-                        await CreatePhotoAlbumAsync(albumName);
+                        await CreatePhotoAlbumAsync(albumName,(data as Picture).GetThumbnail());
                     }
                     List<PPhoto> photos = new List<PPhoto>();
                     foreach (var p in list)
@@ -234,12 +325,12 @@ namespace PianoPhone
 
         async static void AddContactsAsync(IEnumerable<PContact> contacts, CancellationToken cancellationToken)
         {
-           await Task.Run(() =>
+           await Task.Run(async () =>
             {
                 int count = 0;
                 foreach (var contact in contacts)
                 {
-                    SerializeAndSaveFile<PContact>(contact, contact.Path);
+                    await SerializeAndSaveFile<PContact>(contact, contact.Path);
                     count++;
                     cancellationToken.ThrowIfCancellationRequested();
                 }
@@ -247,14 +338,17 @@ namespace PianoPhone
             }, cancellationToken);
         }
 
-        async Task<IReadOnlyList<StoredContact>> GetContactsFromPhoneAsync()
+        public static async Task<IReadOnlyList<StoredContact>> GetContactsFromPhoneAsync(CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
             ContactStore store = await ContactStore.CreateOrOpenAsync();
+            token.ThrowIfCancellationRequested();
             ContactQueryResult result = store.CreateContactQuery();
+            token.ThrowIfCancellationRequested();
             IReadOnlyList<StoredContact> contacts = await result.GetContactsAsync();
+            token.ThrowIfCancellationRequested();
             return contacts;
         }
-
        
     }
 }

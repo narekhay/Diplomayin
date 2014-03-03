@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
@@ -19,6 +20,14 @@ namespace PianoPhone.ViewModels
         {
             Items = new ObservableCollection<CollectionControlModel>();
             LayoutMode = LongListSelectorLayoutMode.Grid;
+        }
+
+        public async void Initialize(CancellationToken token, bool loadFromLibrary = true)
+        {
+            if (loadFromLibrary)
+                await LoadAlbumsFromMediaLibrary(token);
+            else
+                await LoadAlbumsFromStoreAsync(token);
         }
 
         LongListSelectorLayoutMode layoutMode;
@@ -48,36 +57,49 @@ namespace PianoPhone.ViewModels
 
 
 
-        public async void LoadAlbumsFromMediaLibrary()
+        public async Task LoadAlbumsFromMediaLibrary(CancellationToken token)
         {
-            using (var mediaLibrary = new MediaLibrary())
-            {
-                PictureAlbumCollection allAlbums = mediaLibrary.RootPictureAlbum.Albums;
-                foreach (var album in allAlbums)
+                using (var mediaLibrary = new MediaLibrary())
                 {
-                    Items.Add(new CollectionControlModel()
+                    token.ThrowIfCancellationRequested();
+                    PictureAlbumCollection allAlbums = mediaLibrary.RootPictureAlbum.Albums;
+                    foreach (var album in allAlbums)
                     {
-                        FileName = Path.GetFileNameWithoutExtension(album.Name),
-                        Data = album
-                    });
+                        token.ThrowIfCancellationRequested();
+                        Items.Add(new CollectionControlModel()
+                        {
+                            FileName = Path.GetFileNameWithoutExtension(album.Name),
+                            Data = album
+                        });
 
-                    if (album.Pictures.Count == 0)
-                    {
-                        //set default thumbnail
-                        continue;
-                    }
-                    using (Stream str = album.Pictures.First().GetThumbnail())
-                    {
-                        byte[] buffer = new byte[str.Length];
-                        await str.ReadAsync(buffer, 0, buffer.Length);
-                        MemoryStream ms = new MemoryStream();
-                        await ms.WriteAsync(buffer, 0, buffer.Length);
-                        Items.Last().Thumbnail = new BitmapImage();
-                        Items.Last().Thumbnail.SetSource(ms);
-
+                        if (album.Pictures.Count == 0)
+                        {
+                            //set default thumbnail
+                            continue;
+                        }
+                        token.ThrowIfCancellationRequested();
+                        using (Stream str = album.Pictures.First().GetThumbnail())
+                        {
+                            byte[] buffer = new byte[str.Length];
+                            await str.ReadAsync(buffer, 0, buffer.Length);
+                            token.ThrowIfCancellationRequested();
+                            MemoryStream ms = new MemoryStream();
+                            await ms.WriteAsync(buffer, 0, buffer.Length);
+                            token.ThrowIfCancellationRequested();
+                            Items.Last().Thumbnail = new BitmapImage();
+                            Items.Last().Thumbnail.SetSource(ms);
+                        }
                     }
                 }
-            }
+        }
+
+        public Task LoadAlbumsFromStoreAsync(CancellationToken token)
+        {
+            return Task.Run(async () =>
+            {
+                token.ThrowIfCancellationRequested();
+                var resultFiles = await FileManager.GetPhotoAlbums(token);
+            });
         }
 
         public ObservableCollection<CollectionControlModel> Items

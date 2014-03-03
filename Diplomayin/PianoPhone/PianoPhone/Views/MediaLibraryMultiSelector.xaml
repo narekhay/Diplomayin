@@ -28,9 +28,9 @@
                 <phone:PivotItem Name="photosItem" Header="Photos" >
                     <base:CollectionControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                           DataContext="{Binding ViewModels[0],ElementName=mediaSelector}"
-                                          CellSelected="photo_Selected"/>
+                                          />
                 </phone:PivotItem>
-                <phone:PivotItem Name="audioItem" Header="Audio">
+                <phone:PivotItem Name="ContactsItem" Header="Contacts">
                     <base:CollectionControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                           DataContext="{Binding ViewModels[1],ElementName=mediaSelector}"
                                            />
