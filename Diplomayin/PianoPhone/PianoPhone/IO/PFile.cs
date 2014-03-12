@@ -12,7 +12,6 @@ namespace PianoPhone.IO
     [DataContract]
     class PFile
     {
-        [DataMember]
         public MemoryStream Data { get; set; }
 
         [DataMember]

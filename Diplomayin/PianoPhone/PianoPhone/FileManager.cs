@@ -49,24 +49,54 @@ namespace PianoPhone
 
         static Task SerializeAndSaveFile<T>(T source, string path)
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
                 {
                     DataContractJsonSerializer jserializer = new DataContractJsonSerializer(typeof(T));
                     using (Stream destination = new MemoryStream())
                     {
+                        Stream tempStream = new MemoryStream();
+                        jserializer.WriteObject(tempStream, source);
+
+                        //Write length
+                        int jsonPartSize = (int)tempStream.Position;
+                        byte [] jsonLengthArray = BitConverter.GetBytes(jsonPartSize);
+                        await destination.WriteAsync(jsonLengthArray, 0, jsonLengthArray.Length);
+
+                        //Write PFile
+                        await tempStream.CopyToAsync(destination);
+
+                        //Write image
                         (source as PFile).Data.Seek(0, SeekOrigin.Begin);
-                        jserializer.WriteObject(destination, source);
+                        await (source as PFile).Data.CopyToAsync(destination);
                         return SaveFileAsync(path, destination);
                     }
                 });
         }
 
-        async static Task<T> DeserializeAndOpenAsync<T>(string path, FileMode mode, FileAccess access)
+        async static Task<PFile> DeserializeAndOpenAsync(string path, FileMode mode, FileAccess access)
         {
-            await OpenFileAsync(path, mode, access);
-            DataContractJsonSerializer jserializer = new DataContractJsonSerializer(typeof(T));
-            var source = new FileStream(path, mode, access);
-            return (T)(jserializer.ReadObject(source));
+            using (Stream source = await OpenFileAsync(path, mode, access))
+            {
+                byte [] lengthArray = new byte[sizeof(int)];
+                await source.ReadAsync(lengthArray, 0, lengthArray.Length);
+                int jsonLength =  BitConverter.ToInt32(lengthArray,0);
+
+                PFile result = new PFile();
+                result.Data = new MemoryStream();
+                byte[] jsonArray = new byte[jsonLength];
+                await source.ReadAsync(jsonArray, (int)source.Position, jsonArray.Length);
+
+                Stream jsonStream = new MemoryStream();
+                await jsonStream.WriteAsync(buffer, 0, buffer.Length);
+                DataContractJsonSerializer jserializer = new DataContractJsonSerializer(typeof(PFile));
+                PFile obj = (PFile)jserializer.ReadObject(jsonStream);
+                byte[] imageBuffer = new byte[str.Length - jsonPartSize];
+                await str.ReadAsync(imageBuffer, (int)str.Position, imageBuffer.Length);
+                obj.Data = new MemoryStream();
+                await obj.Data.WriteAsync(imageBuffer, 0, imageBuffer.Length);
+                //var source = new FileStream(path, mode, access);
+                return obj;// (T)(jserializer.ReadObject(source));
+            }
         }
 
          public static Task<List<PPhoto>> GetPhotosAsync(string albumName, CancellationToken token)
@@ -82,7 +112,7 @@ namespace PianoPhone
                             foreach (var fileName in fileNames)
                             {
                                 string filePath = Path.Combine(Directories.AlbumRoot, albumName, fileName);
-                                photos.Add(await DeserializeAndOpenAsync<PPhoto>(filePath, FileMode.Open, FileAccess.ReadWrite));
+                                photos.Add((await DeserializeAndOpenAsync(filePath, FileMode.Open, FileAccess.ReadWrite)) as PPhoto);
                             }
                         }
                         catch
@@ -107,7 +137,7 @@ namespace PianoPhone
                              foreach (var fileName in fileNames)
                              {
                                  string filePath = Path.Combine(Directories.Thumbnails, fileName);
-                                 albums.Add( await DeserializeAndOpenAsync<PFile>(filePath, FileMode.Open, FileAccess.ReadWrite));
+                                 albums.Add( await DeserializeAndOpenAsync(filePath, FileMode.Open, FileAccess.ReadWrite));
                              }
                          }
                          return albums;
@@ -134,7 +164,7 @@ namespace PianoPhone
                          {
                              token.ThrowIfCancellationRequested();
                              string filePath = Path.Combine(Directories.Contacts, fileName);
-                             StoredContact scontact = await DeserializeAndOpenAsync<StoredContact>(filePath, FileMode.Open, FileAccess.ReadWrite);
+                             StoredContact scontact = new StoredContact(null);// (await DeserializeAndOpenAsync(filePath, FileMode.Open, FileAccess.ReadWrite)) as StoredContact;
                              token.ThrowIfCancellationRequested();
                              PContact contact = new PContact();
                              contact.Name = fileName;
