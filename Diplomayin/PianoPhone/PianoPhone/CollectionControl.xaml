@@ -20,7 +20,7 @@
                 </Grid.RowDefinitions>
                 <Image CacheMode="BitmapCache" Source="{Binding Thumbnail}"
                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                       Stretch="UniformToFill"/>
+                       Stretch="UniformToFill" Width="300" Height="300"/>
                 <TextBlock Text="{Binding FileName}" Grid.Row="1" VerticalAlignment="Bottom"
                            HorizontalAlignment="Stretch" Margin="2,0,2,0"/>
             </Grid>
@@ -28,7 +28,7 @@
     </UserControl.Resources>
     <Grid x:Name="LayoutRoot" DataContext="{Binding}" Background="{StaticResource PhoneChromeBrush}">
         <toolkit:LongListMultiSelector Name="longListSelector"  ItemTemplate="{StaticResource CollectionControlCellItemTemplate}"
-                             DataContext="{Binding}" GridCellSize="150,150"
+                             DataContext="{Binding}" GridCellSize="80,80"
                                    ItemsSource="{Binding Items}" 
                                       SelectionChanged="longListSelector_SelectionChanged_1"
                                   />

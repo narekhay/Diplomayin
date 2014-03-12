@@ -54,6 +54,7 @@ namespace PianoPhone
                     DataContractJsonSerializer jserializer = new DataContractJsonSerializer(typeof(T));
                     using (Stream destination = new MemoryStream())
                     {
+                        (source as PFile).Data.Seek(0, SeekOrigin.Begin);
                         jserializer.WriteObject(destination, source);
                         return SaveFileAsync(path, destination);
                     }
@@ -180,7 +181,8 @@ namespace PianoPhone
                         {
                             byte [] buffer=  new byte[thumbPicture.Length];
                             await thumbPicture.ReadAsync(buffer,0, buffer.Length);
-                            await album.Data.WriteAsync(buffer,0,buffer.Length);
+                            album.Data = new MemoryStream();
+                           await album.Data.WriteAsync(buffer, 0, buffer.Length);
                         }
                         await SerializeAndSaveFile<PFile>(album,album.Path);
                         return true;
@@ -259,6 +261,7 @@ namespace PianoPhone
                                 {
                                     byte[] arr = new byte[source.Length];
                                     await source.ReadAsync(arr, 0, arr.Length);
+                                    photo.Data = new MemoryStream();
                                     await photo.Data.WriteAsync(arr, 0, arr.Length);
                                 }
                             });
@@ -296,6 +299,7 @@ namespace PianoPhone
                             {
                                 byte[] arr = new byte[source.Length];
                                 await source.ReadAsync(arr, 0, arr.Length);
+                                photo.Data = new MemoryStream();
                                 await photo.Data.WriteAsync(arr, 0, arr.Length);
                             }
                         });

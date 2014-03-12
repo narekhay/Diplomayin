@@ -10,6 +10,8 @@ using Microsoft.Phone.Shell;
 using PianoPhone.ViewModels;
 using System.Threading;
 using System.Collections.ObjectModel;
+using Microsoft.Xna.Framework.Media;
+using System.Threading.Tasks;
 
 namespace PianoPhone.Views
 {
@@ -28,10 +30,13 @@ namespace PianoPhone.Views
         {
             ViewModels = new ObservableCollection<IViewModel>();
             var albumsModel = new AlbumsViewModel();
+            albumsModel.IsSelectionEnabled = false;
             albumsModel.Initialize(cts.Token);
             var contactsModel = new ContactsViewModel();
+            contactsModel.IsSelectionEnabled = true;
             contactsModel.Initialize(cts.Token);
             ViewModels.Add(albumsModel);
+            ViewModels.Add(contactsModel);
         }
 
         private void BuildApplicationBar()
@@ -106,6 +111,35 @@ namespace PianoPhone.Views
                     ((pivot.SelectedItem as PivotItem).Content as CollectionControl).Initialize(ViewModels[0]);
                 }
             }
+        }
+
+        private void pivot_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
+        {
+            return;
+            if ((((pivot.SelectedItem as PivotItem).Content as CollectionControl).DataContext as IViewModel).IsSelectionEnabled)
+                CreateCompletedAppBar();
+            else
+                CreateSelectionAppBar();
+        }
+
+        private void CollectionControl_CellSelected_1(object sender, CellSelectedEventArgs e)
+        {
+            if (pivot.SelectedIndex == 0)
+            {
+                if (e.Type == CellType.Album)
+                {
+                    var pModel = new PhotosViewModel();
+                    pModel.Initialize(e.SelectedItem.Data as PictureAlbum, cts.Token);
+                    ViewModels[0] = pModel;
+                    ((pivot.SelectedItem as PivotItem).Content as CollectionControl).Initialize(ViewModels[0]);
+                    CreateCompletedAppBar();
+                }
+            }
+        }
+
+        private void CollectionControl_CellSelected_2(object myObject, CellSelectedEventArgs myArgs)
+        {
+
         }
     }
 }

@@ -18,16 +18,23 @@ namespace PianoPhone.ViewModels
     {
         public AlbumsViewModel()
         {
-            Items = new ObservableCollection<CollectionControlModel>();
             LayoutMode = LongListSelectorLayoutMode.Grid;
+            
+            Items = new ObservableCollection<CollectionControlModel>();
         }
 
         public async void Initialize(CancellationToken token, bool loadFromLibrary = true)
         {
             if (loadFromLibrary)
+            {
+                IsSelectionEnabled = false;
                 await LoadAlbumsFromMediaLibrary(token);
+            }
             else
+            {
+                IsSelectionEnabled = false;
                 await LoadAlbumsFromStoreAsync(token);
+            }
         }
 
         LongListSelectorLayoutMode layoutMode;
@@ -61,6 +68,7 @@ namespace PianoPhone.ViewModels
         {
                 using (var mediaLibrary = new MediaLibrary())
                 {
+                    await Task.Delay(new TimeSpan(0, 0, 0, 0, 10));
                     token.ThrowIfCancellationRequested();
                     PictureAlbumCollection allAlbums = mediaLibrary.RootPictureAlbum.Albums;
                     foreach (var album in allAlbums)

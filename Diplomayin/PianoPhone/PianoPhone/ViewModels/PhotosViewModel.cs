@@ -21,44 +21,77 @@ namespace PianoPhone.ViewModels
     {
         public PhotosViewModel()
         {
+            LayoutMode = LongListSelectorLayoutMode.Grid;
+            
             Items = new ObservableCollection<CollectionControlModel>();
+
         }
 
-        public Task Initialize(PictureAlbum album, CancellationToken token, bool fromLibrary = true)
+        public async void Initialize(PictureAlbum album, CancellationToken token, bool fromLibrary = true)
         {
             if (fromLibrary)
-                return LoadAlbumsFromMediaLibraryAsync(album, token);
+            {
+                IsSelectionEnabled = true;
+                await LoadAlbumsFromMediaLibraryAsync(album, token);
+            }
             else
-                return LoadAlbumPhotosFromStoreAsync(album.Name, token);
+            {
+                IsSelectionEnabled = false;
+                await LoadAlbumPhotosFromStoreAsync(album.Name, token);
+            }
         }
 
-        public Task LoadAlbumsFromMediaLibraryAsync(PictureAlbum album, CancellationToken token)
+        public async Task LoadAlbumsFromMediaLibraryAsync(PictureAlbum album, CancellationToken token)
         {
-            return Task.Run(async () =>
+            ObservableCollection<CollectionControlModel> newItems = new ObservableCollection<CollectionControlModel>();
+            foreach (var photo in album.Pictures)
+            {
+                Log(photo.Name);
+               // await Task.Delay(new TimeSpan(0,0,0,0,10));
+                token.ThrowIfCancellationRequested();
+                Log(photo.Name + "50");
+                newItems.Add(new CollectionControlModel()
                 {
-                    foreach (var photo in album.Pictures)
+                    FileName = Path.GetFileNameWithoutExtension(photo.Name),
+                    Data = photo
+                });
+                Log(photo.Name);
+                token.ThrowIfCancellationRequested();
+                using (Stream str = photo.GetThumbnail())
+                {
+                   
+                    Log(photo.Name + "60");
+                    byte[] buffer = new byte[str.Length];
+                    await str.ReadAsync(buffer, 0, buffer.Length);
+                    Log(photo.Name + "63");
+                    token.ThrowIfCancellationRequested();
+                    using (MemoryStream ms = new MemoryStream())
                     {
+                        Log(photo.Name + "67");
+                        await ms.WriteAsync(buffer, 0, buffer.Length);
                         token.ThrowIfCancellationRequested();
-                        Items.Add(new CollectionControlModel()
-                        {
-                            FileName = Path.GetFileNameWithoutExtension(photo.Name),
-                            Data = photo
-                        });
-                        token.ThrowIfCancellationRequested();
-                        using (Stream str = photo.GetThumbnail())
-                        {
-                            byte[] buffer = new byte[str.Length];
-                            await str.ReadAsync(buffer, 0, buffer.Length);
-                            token.ThrowIfCancellationRequested();
-                            MemoryStream ms = new MemoryStream();
-                            await ms.WriteAsync(buffer, 0, buffer.Length);
-                            token.ThrowIfCancellationRequested();
-                            Items.Last().Thumbnail = new BitmapImage();
-                            Items.Last().Thumbnail.SetSource(ms);
-                        }
+                        newItems.Last().Thumbnail = new BitmapImage();
+                        newItems.Last().Thumbnail.SetSource(ms);
+                        Log(photo.Name + "72");
                     }
-                },token);
+                    //await Task.Delay(new TimeSpan(0, 0, 0, 0, 10));
+                    //Thread.Sleep(1000);
+                }
+            }
+            foreach (var item in newItems)
+            {
+                Items.Add(item);
+            }
         }
+
+        void Log(params string[] a )
+    {
+        foreach (var item in a)
+        {
+            System.Diagnostics.Debug.WriteLine(item.ToString());
+        }
+    }
+
 
         public Task LoadAlbumPhotosFromStoreAsync(string albumName, CancellationToken token)
         {

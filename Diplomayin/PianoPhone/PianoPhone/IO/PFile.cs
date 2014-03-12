@@ -8,13 +8,16 @@ using System.Threading.Tasks;
 
 namespace PianoPhone.IO
 {
+    [KnownType(typeof(MemoryStream))]
     [DataContract]
     class PFile
     {
         [DataMember]
-        public Stream Data { get; set; }
+        public MemoryStream Data { get; set; }
+
         [DataMember]
         public string Path { get; set; }
+
         [DataMember]
         public string Name { get; set; }
     }

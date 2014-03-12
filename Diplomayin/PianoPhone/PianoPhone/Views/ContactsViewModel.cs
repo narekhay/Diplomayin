@@ -16,14 +16,21 @@ namespace PianoPhone.Views
        public ContactsViewModel()
        {
            LayoutMode = LongListSelectorLayoutMode.List;
+           
        }
 
        public void Initialize(CancellationToken token, bool fromStore = true)
        {
            if (fromStore)
-             LoadContactsFromContactStore(token);
+           {
+               IsSelectionEnabled = true;
+               LoadContactsFromContactStore(token);
+           }
            else
+           {
+               IsSelectionEnabled =false;
                LoadContactsFromStorage(token);
+           }
 
        }
 

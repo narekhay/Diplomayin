@@ -24,16 +24,16 @@
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <phone:Pivot Name="pivot">
+            <phone:Pivot Name="pivot" SelectionChanged="pivot_SelectionChanged_1">
                 <phone:PivotItem Name="photosItem" Header="Photos" >
                     <base:CollectionControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                           DataContext="{Binding ViewModels[0],ElementName=mediaSelector}"
-                                          />
+                                          CellSelected="CollectionControl_CellSelected_1"/>
                 </phone:PivotItem>
                 <phone:PivotItem Name="ContactsItem" Header="Contacts">
                     <base:CollectionControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                           DataContext="{Binding ViewModels[1],ElementName=mediaSelector}"
-                                           />
+                                           CellSelected="CollectionControl_CellSelected_2"/>
                 </phone:PivotItem>
             </phone:Pivot>
         </Grid>
