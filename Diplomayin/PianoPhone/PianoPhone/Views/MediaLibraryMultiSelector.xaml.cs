@@ -21,14 +21,16 @@ namespace PianoPhone.Views
         {
             InitializeViewModels();
             InitializeComponent();
+            photosCollectionControl.Initialize(ViewModels[0]);
+            contactsCollectionControl.Initialize(ViewModels[1]);
             BuildApplicationBar();
         }
 
         CancellationTokenSource cts = new CancellationTokenSource();
-        public ObservableCollection<IViewModel> ViewModels { get; set; }
+        public ObservableCollection<ViewModel> ViewModels { get; set; }
         private void InitializeViewModels()
         {
-            ViewModels = new ObservableCollection<IViewModel>();
+            ViewModels = new ObservableCollection<ViewModel>();
             var albumsModel = new AlbumsViewModel();
             albumsModel.IsSelectionEnabled = false;
             albumsModel.Initialize(cts.Token);
@@ -37,6 +39,7 @@ namespace PianoPhone.Views
             contactsModel.Initialize(cts.Token);
             ViewModels.Add(albumsModel);
             ViewModels.Add(contactsModel);
+          
         }
 
         private void BuildApplicationBar()
@@ -73,19 +76,25 @@ namespace PianoPhone.Views
                 ApplicationBar.Buttons[0] = appBarButton;
         }
 
-        void appBarButton_Click(object sender, EventArgs e)
+       async void appBarButton_Click(object sender, EventArgs e)
         {
             if ((sender as ApplicationBarIconButton).Text == "select")
             {
                 ViewModels[pivot.SelectedIndex].IsSelectionEnabled = true;
-                pivot.IsEnabled = false;
+                pivot.IsLocked = false;
                 CreateCompletedAppBar();
             }
             else
             {
-                FileManager.SaveItems(((pivot.SelectedItem as PivotItem).Content as CollectionControl).SelectedItems);
+                loadingControl.Visibility = System.Windows.Visibility.Visible;
+                await FileManager.SaveItems(((pivot.SelectedItem as PivotItem).Content as CollectionControl).SelectedItems);
+                loadingControl.Visibility = System.Windows.Visibility.Collapsed;
+
+                ViewModels[pivot.SelectedIndex].IsSelectionEnabled = false;
+                pivot.IsLocked = true;
+                CreateSelectionAppBar();
+                
             }
-         
         }
 
         int deep = 0;
@@ -95,7 +104,7 @@ namespace PianoPhone.Views
             {
                 e.Cancel = true;
                 ViewModels[pivot.SelectedIndex].IsSelectionEnabled = false;
-                pivot.IsEnabled = true;
+                pivot.IsLocked = true;
                 CreateSelectionAppBar();
                 return;
             }
@@ -116,7 +125,7 @@ namespace PianoPhone.Views
         private void pivot_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
         {
             return;
-            if ((((pivot.SelectedItem as PivotItem).Content as CollectionControl).DataContext as IViewModel).IsSelectionEnabled)
+            if ((((pivot.SelectedItem as PivotItem).Content as CollectionControl).DataContext as ViewModel).IsSelectionEnabled)
                 CreateCompletedAppBar();
             else
                 CreateSelectionAppBar();

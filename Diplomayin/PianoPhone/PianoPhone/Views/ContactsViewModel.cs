@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace PianoPhone.Views
 {
-   public class ContactsViewModel:IViewModel
+   public class ContactsViewModel:ViewModel
     {
        public ContactsViewModel()
        {

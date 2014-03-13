@@ -22,11 +22,19 @@ namespace PianoPhone
             InitializeComponent();
         }
 
-        public void Initialize(IViewModel viewModel)
+        public void Initialize(ViewModel viewModel)
         {
             this.DataContext = viewModel;
+            (this.DataContext as ViewModel).ViewModelLayoutChanged += CollectionControl_ViewModelLayoutChanged;
             longListSelector.LayoutMode = viewModel.LayoutMode;
             longListSelector.IsSelectionEnabled = viewModel.IsSelectionEnabled;
+        }
+
+        void CollectionControl_ViewModelLayoutChanged(object sender)
+        {
+            var source = sender as ViewModel;
+            longListSelector.LayoutMode = source.LayoutMode;
+            longListSelector.IsSelectionEnabled = source.IsSelectionEnabled;
         }
 
 
@@ -79,12 +87,12 @@ namespace PianoPhone
         
         private static void SetLayoutMode(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((d as CollectionControl).DataContext as IViewModel).LayoutMode = (LongListSelectorLayoutMode)e.NewValue;
+            ((d as CollectionControl).DataContext as ViewModel).LayoutMode = (LongListSelectorLayoutMode)e.NewValue;
         }
 
         private static void SetIsSelectionEnabled(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((d as CollectionControl).DataContext as IViewModel).IsSelectionEnabled = (bool)e.NewValue;
+            ((d as CollectionControl).DataContext as ViewModel).IsSelectionEnabled = (bool)e.NewValue;
         }
 
     }

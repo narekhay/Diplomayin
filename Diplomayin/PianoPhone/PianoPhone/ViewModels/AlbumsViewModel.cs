@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 
 namespace PianoPhone.ViewModels
 {
-    public class AlbumsViewModel : IViewModel
+    public class AlbumsViewModel : ViewModel
     {
         public AlbumsViewModel()
         {
@@ -37,32 +37,7 @@ namespace PianoPhone.ViewModels
             }
         }
 
-        LongListSelectorLayoutMode layoutMode;
-        public LongListSelectorLayoutMode LayoutMode
-        {
-            get
-            {
-                return layoutMode;
-            }
-            set
-            {
-                layoutMode = value;
-                OnPropertyChanged("LayoutMode");
-            }
-        }
-
-        bool isSelectionEnabled;
-        public bool IsSelectionEnabled
-        {
-            get { return isSelectionEnabled; }
-            set
-            {
-                isSelectionEnabled = value;
-                OnPropertyChanged("IsSelectionEnabled");
-            }
-        }
-
-
+      
 
         public async Task LoadAlbumsFromMediaLibrary(CancellationToken token)
         {
@@ -115,16 +90,5 @@ namespace PianoPhone.ViewModels
             get;
             set;
         }
-
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string p)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(p));
-            }
         }
-        #endregion
-    }
 }

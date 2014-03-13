@@ -17,7 +17,7 @@ using Windows.Storage;
 
 namespace PianoPhone.ViewModels
 {
-    public class PhotosViewModel: IViewModel
+    public class PhotosViewModel: ViewModel
     {
         public PhotosViewModel()
         {
@@ -125,43 +125,6 @@ namespace PianoPhone.ViewModels
             set;
         }
 
-        bool isSelectionEnabled;
-        public bool IsSelectionEnabled
-        {
-            get
-            {
-                return isSelectionEnabled;
-            }
-            set
-            {
-                isSelectionEnabled = value;
-                OnPropertyChanged("IsSelectionEnabled");
-            }
-        }
-
-        LongListSelectorLayoutMode layoutMode;
-        public LongListSelectorLayoutMode LayoutMode
-        {
-            get
-            {
-                return layoutMode;
-            }
-            set
-            {
-                layoutMode = value;
-                OnPropertyChanged("LayoutMode");
-            }
-        }
-
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string p)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(p));
-            }
-        }
-        #endregion
+       
     }
 }

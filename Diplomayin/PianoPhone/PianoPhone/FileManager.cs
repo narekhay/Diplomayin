@@ -52,8 +52,7 @@ namespace PianoPhone
             return Task.Run(async () =>
                 {
                     DataContractJsonSerializer jserializer = new DataContractJsonSerializer(typeof(T));
-                    using (Stream destination = new MemoryStream())
-                    {
+                    Stream destination = new MemoryStream();
                         Stream tempStream = new MemoryStream();
                         jserializer.WriteObject(tempStream, source);
 
@@ -69,7 +68,6 @@ namespace PianoPhone
                         (source as PFile).Data.Seek(0, SeekOrigin.Begin);
                         await (source as PFile).Data.CopyToAsync(destination);
                         return SaveFileAsync(path, destination);
-                    }
                 });
         }
 
@@ -81,21 +79,18 @@ namespace PianoPhone
                 await source.ReadAsync(lengthArray, 0, lengthArray.Length);
                 int jsonLength =  BitConverter.ToInt32(lengthArray,0);
 
-                PFile result = new PFile();
-                result.Data = new MemoryStream();
                 byte[] jsonArray = new byte[jsonLength];
                 await source.ReadAsync(jsonArray, (int)source.Position, jsonArray.Length);
-
-                Stream jsonStream = new MemoryStream();
-                await jsonStream.WriteAsync(buffer, 0, buffer.Length);
                 DataContractJsonSerializer jserializer = new DataContractJsonSerializer(typeof(PFile));
-                PFile obj = (PFile)jserializer.ReadObject(jsonStream);
-                byte[] imageBuffer = new byte[str.Length - jsonPartSize];
-                await str.ReadAsync(imageBuffer, (int)str.Position, imageBuffer.Length);
-                obj.Data = new MemoryStream();
-                await obj.Data.WriteAsync(imageBuffer, 0, imageBuffer.Length);
-                //var source = new FileStream(path, mode, access);
-                return obj;// (T)(jserializer.ReadObject(source));
+                Stream jsonStream = new MemoryStream();
+                await jsonStream.WriteAsync(jsonArray, 0, jsonArray.Length);
+                PFile result = (PFile)jserializer.ReadObject(jsonStream);
+                
+                byte[] imageBuffer = new byte[source.Length - source.Position];
+                await source.ReadAsync(imageBuffer, (int)source.Position, imageBuffer.Length);
+                result.Data = new MemoryStream();
+                await result.Data.WriteAsync(imageBuffer, 0, imageBuffer.Length);
+                return result;// (T)(jserializer.ReadObject(source));
             }
         }
 
@@ -268,7 +263,7 @@ namespace PianoPhone
         }
 
 
-      public async static void SaveItems(List<Models.CollectionControlModel> list)
+      public async static Task SaveItems(List<Models.CollectionControlModel> list)
         {
             var data=  list.First().Data;
             if (data is PictureAlbum)
