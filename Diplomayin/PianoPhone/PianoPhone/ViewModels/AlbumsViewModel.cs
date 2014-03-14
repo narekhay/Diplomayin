@@ -77,21 +77,32 @@ namespace PianoPhone.ViewModels
                 }
         }
 
-        public Task LoadAlbumsFromStoreAsync(CancellationToken token)
+        public async Task LoadAlbumsFromStoreAsync(CancellationToken token)
         {
-            return Task.Run(async () =>
-            {
                 token.ThrowIfCancellationRequested();
                 var resultFiles = await FileManager.GetPhotoAlbums(token);
                 foreach (var album in resultFiles)
                 {
                     Items.Add(new CollectionControlModel()
-                    {
+                    {                        
                         FileName = Path.GetFileNameWithoutExtension(album.Name),
-                        Data = album, 
+                        Data = album
                     });
+
+                    token.ThrowIfCancellationRequested();
+                    using (Stream str = album.Data)
+                    {
+                        byte[] buffer = new byte[str.Length];
+                        await str.ReadAsync(buffer, 0, buffer.Length);
+                        token.ThrowIfCancellationRequested();
+                        MemoryStream ms = new MemoryStream();
+                        await ms.WriteAsync(buffer, 0, buffer.Length);
+                        ms.Seek(0, SeekOrigin.Begin);
+                        token.ThrowIfCancellationRequested();
+                        Items.Last().Thumbnail = new BitmapImage();
+                        Items.Last().Thumbnail.SetSource(ms);
+                    }
                 }
-            });
         }
 
         public ObservableCollection<CollectionControlModel> Items
