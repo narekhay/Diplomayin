@@ -68,6 +68,7 @@ namespace PianoPhone.ViewModels
                             token.ThrowIfCancellationRequested();
                             MemoryStream ms = new MemoryStream();
                             await ms.WriteAsync(buffer, 0, buffer.Length);
+                            ms.Seek(0, SeekOrigin.Begin);
                             token.ThrowIfCancellationRequested();
                             Items.Last().Thumbnail = new BitmapImage();
                             Items.Last().Thumbnail.SetSource(ms);
@@ -82,6 +83,14 @@ namespace PianoPhone.ViewModels
             {
                 token.ThrowIfCancellationRequested();
                 var resultFiles = await FileManager.GetPhotoAlbums(token);
+                foreach (var album in resultFiles)
+                {
+                    Items.Add(new CollectionControlModel()
+                    {
+                        FileName = Path.GetFileNameWithoutExtension(album.Name),
+                        Data = album, 
+                    });
+                }
             });
         }
 

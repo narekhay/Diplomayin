@@ -51,40 +51,5 @@ namespace PianoPhone.Views
         }
 
 
-        LongListSelectorLayoutMode layoutMode;
-        public LongListSelectorLayoutMode LayoutMode
-        {
-            get
-            {
-                return layoutMode;
-            }
-            set
-            {
-                layoutMode = value;
-                OnPropertyChanged("LayoutMode");
-            }
-        }
-
-        bool isSelectionEnabled;
-        public bool IsSelectionEnabled
-        {
-            get { return isSelectionEnabled; }
-            set
-            {
-                isSelectionEnabled = value;
-                OnPropertyChanged("IsSelectionEnabled");
-            }
-        }
-
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string p)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(p));
-            }
-        }
-        #endregion
     }
 }

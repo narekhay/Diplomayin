@@ -39,6 +39,7 @@ namespace PianoPhone
                     using (IsolatedStorageFileStream fs = await OpenFileAsync(path, FileMode.OpenOrCreate, FileAccess.Write))
                     {
                         byte [] buffer = new byte[data.Length];
+                        data.Seek(0, SeekOrigin.Begin);
                         await data.ReadAsync(buffer,0,buffer.Length);
                         await fs.WriteAsync(buffer, 0, buffer.Length);
                     }
@@ -51,6 +52,7 @@ namespace PianoPhone
         {
             return Task.Run(async () =>
                 {
+                    
                     DataContractJsonSerializer jserializer = new DataContractJsonSerializer(typeof(T));
                     Stream destination = new MemoryStream();
                         Stream tempStream = new MemoryStream();
@@ -60,6 +62,7 @@ namespace PianoPhone
                         int jsonPartSize = (int)tempStream.Position;
                         byte [] jsonLengthArray = BitConverter.GetBytes(jsonPartSize);
                         await destination.WriteAsync(jsonLengthArray, 0, jsonLengthArray.Length);
+                        tempStream.Seek(0, SeekOrigin.Begin);
 
                         //Write PFile
                         await tempStream.CopyToAsync(destination);
@@ -80,16 +83,18 @@ namespace PianoPhone
                 int jsonLength =  BitConverter.ToInt32(lengthArray,0);
 
                 byte[] jsonArray = new byte[jsonLength];
-                await source.ReadAsync(jsonArray, (int)source.Position, jsonArray.Length);
+                await source.ReadAsync(jsonArray, 0, jsonArray.Length);
                 DataContractJsonSerializer jserializer = new DataContractJsonSerializer(typeof(PFile));
                 Stream jsonStream = new MemoryStream();
                 await jsonStream.WriteAsync(jsonArray, 0, jsonArray.Length);
+                jsonStream.Seek(0, SeekOrigin.Begin);
                 PFile result = (PFile)jserializer.ReadObject(jsonStream);
                 
                 byte[] imageBuffer = new byte[source.Length - source.Position];
-                await source.ReadAsync(imageBuffer, (int)source.Position, imageBuffer.Length);
+                await source.ReadAsync(imageBuffer, 0, imageBuffer.Length);
                 result.Data = new MemoryStream();
                 await result.Data.WriteAsync(imageBuffer, 0, imageBuffer.Length);
+                result.Data.Seek(0, SeekOrigin.Begin);
                 return result;// (T)(jserializer.ReadObject(source));
             }
         }
@@ -146,7 +151,7 @@ namespace PianoPhone
 
          public static Task<List<PContact>> GetContactsAsync(CancellationToken token)
          {
-             return Task.Run(async () =>
+             return Task.Run(() =>
              {
                  List<PContact> contacts = new List<PContact>();
                  try
@@ -205,6 +210,7 @@ namespace PianoPhone
                         using(thumbPicture)
                         {
                             byte [] buffer=  new byte[thumbPicture.Length];
+                            thumbPicture.Seek(0, SeekOrigin.Begin);
                             await thumbPicture.ReadAsync(buffer,0, buffer.Length);
                             album.Data = new MemoryStream();
                            await album.Data.WriteAsync(buffer, 0, buffer.Length);

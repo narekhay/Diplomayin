@@ -97,6 +97,7 @@
     <Compile Include="CollectionControl.xaml.cs">
       <DependentUpon>CollectionControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DebugHelper.cs" />
     <Compile Include="Directories.cs" />
     <Compile Include="FileManager.cs" />
     <Compile Include="IO\PContact.cs" />
@@ -123,7 +124,7 @@
     <Compile Include="ViewModels\AlbumsViewModel.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
     <Compile Include="ViewModels\PhotosViewModel.cs" />
-    <Compile Include="Views\ContactsViewModel.cs" />
+    <Compile Include="ViewModels\ContactsViewModel.cs" />
     <Compile Include="Views\MediaLibraryMultiSelector.xaml.cs">
       <DependentUpon>MediaLibraryMultiSelector.xaml</DependentUpon>
     </Compile>
